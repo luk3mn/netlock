@@ -1,7 +1,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { router } from 'expo-router';
-import { Alert, Text } from 'react-native';
+import { Alert } from 'react-native';
 import NetLock from '../../modules/net-lock';
 import { Button } from '../components/button';
 import { useNetLock } from '../hooks/use-net-lock';
@@ -39,10 +39,10 @@ export default function Home() {
     );
 
   return (
-    <ThemedView className="flex-1 justify-center gap-4 p-6">
-      <Text className="text-center text-2xl font-bold text-white">
+    <ThemedView style={{ flex: 1, justifyContent: 'center', padding: 16 }}>
+      <ThemedText style={{ textAlign: 'center', fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>
         {status.active ? 'Proteção ativa' : 'Proteção desligada'}
-      </Text>
+      </ThemedText>
 
       {!status.isOwner && (
         <ThemedText style={{ textAlign: 'center', fontSize: 16, color: '#f87171' }}>

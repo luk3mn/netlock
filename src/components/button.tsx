@@ -18,9 +18,9 @@ export function Button({ label, onPress, tone = 'primary', disabled }: ButtonPro
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      className={`rounded-2xl p-4 active:opacity-80 ${tones[tone]} ${disabled ? 'opacity-40' : ''}`}
+      style={{ opacity: disabled ? 0.5 : 1, paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8, backgroundColor: tones[tone], marginTop: 10 }}
     >
-      <Text className="text-center font-semibold text-white">{label}</Text>
+      <Text style={{ textAlign: 'center', fontWeight: 'bold', color: '#fff' }}>{label}</Text>
     </Pressable>
   );
 }
