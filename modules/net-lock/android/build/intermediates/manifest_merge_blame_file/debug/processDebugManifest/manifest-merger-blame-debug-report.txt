@@ -6,4 +6,30 @@
 5-->INJECTED
 5-->INJECTED
 6
-7</manifest>
+7    <application>
+7-->/home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:2:3-14:17
+8        <receiver
+8-->/home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:3:5-13:16
+9            android:name="expo.modules.netlock.NetLockAdminReceiver"
+9-->/home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:4:7-63
+10            android:exported="true"
+10-->/home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:5:7-30
+11            android:permission="android.permission.BIND_DEVICE_ADMIN" >
+11-->/home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:6:7-64
+12            <intent-filter>
+12-->/home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:7:7-9:23
+13                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+13-->/home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:8:9-74
+13-->/home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:8:17-71
+14            </intent-filter>
+15
+16            <meta-data
+16-->/home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:10:7-12:48
+17                android:name="android.app.device_admin"
+17-->/home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:11:9-48
+18                android:resource="@xml/device_admin" />
+18-->/home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:12:9-45
+19        </receiver>
+20    </application>
+21
+22</manifest>

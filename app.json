@@ -18,7 +18,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.luk3mn.netlock"
+      "package": "com.netlock.app"
     },
     "web": {
       "output": "server",

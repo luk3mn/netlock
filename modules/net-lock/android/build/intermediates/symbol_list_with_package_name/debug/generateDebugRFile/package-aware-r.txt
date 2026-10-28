@@ -1,1 +1,2 @@
 expo.modules.netlock
+xml device_admin

@@ -1,98 +1,88 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { router } from 'expo-router';
+import { Alert, Text } from 'react-native';
+import NetLock from '../../modules/net-lock';
+import { Button } from '../components/button';
+import { useNetLock } from '../hooks/use-net-lock';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
+const formatRemaining = (ms: number) => {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const h = String(Math.floor(total / 3600)).padStart(2, '0');
+  const m = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
+  const s = String(total % 60).padStart(2, '0');
+  return `${h}:${m}:${s}`;
+};
+
+export default function Home() {
+  const { status, now, refresh } = useNetLock();
+  const waiting = status.active && status.unlockAt > now;
+  const requested = status.active && status.unlockAt !== 0;
+
+  const run = (action: () => unknown) => {
+    try {
+      action();
+    } catch (error) {
+      Alert.alert('Erro', error instanceof Error ? error.message : String(error));
+    }
+    refresh();
+  };
+
+  const confirmRequest = () =>
+    Alert.alert(
+      'Pedir desativação?',
+      'A proteção só poderá ser desligada após o período de espera, em uma janela de 30 minutos.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Pedir', style: 'destructive', onPress: () => run(() => NetLock.requestDisable()) },
+      ]
     );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
 
-export default function HomeScreen() {
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <ThemedView className="flex-1 justify-center gap-4 p-6">
+      <Text className="text-center text-2xl font-bold text-white">
+        {status.active ? 'Proteção ativa' : 'Proteção desligada'}
+      </Text>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
+      {!status.isOwner && (
+        <ThemedText style={{ textAlign: 'center', fontSize: 16, color: '#f87171' }}>
+          O app ainda não é Device Owner. Rode o comando adb.
         </ThemedText>
+      )}
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+      {waiting && (
+        <ThemedText style={{ textAlign: 'center', fontSize: 16, color: '#a3a3a3' }}>
+          Liberação em {formatRemaining(status.unlockAt - now)}
+        </ThemedText>
+      )}
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
+      {status.canDisable && (
+        <ThemedText style={{ textAlign: 'center', fontSize: 16, color: '#10b981' }}>
+          Liberado. Você pode desativar agora.
+        </ThemedText>
+      )}
+
+      {!status.active && (
+        <Button
+          label="Ativar proteção"
+          disabled={!status.isOwner || !status.host}
+          onPress={() => run(() => NetLock.enable())}
+        />
+      )}
+
+      {status.active && !requested && (
+        <Button label="Pedir desativação" tone="danger" onPress={confirmRequest} />
+      )}
+
+      {waiting && (
+        <Button label="Cancelar pedido" tone="muted" onPress={() => run(() => NetLock.cancelDisable())} />
+      )}
+
+      {status.canDisable && (
+        <Button label="Desativar agora" tone="danger" onPress={() => run(() => NetLock.disable())} />
+      )}
+
+      <Button label="Configurações" tone="muted" onPress={() => router.push('/config')} />
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-});
