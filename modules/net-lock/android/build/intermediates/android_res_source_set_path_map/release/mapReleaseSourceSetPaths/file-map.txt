@@ -1,0 +1,9 @@
+expo.modules.netlock.net-lock-pngs-0 /home/lukemn/Projects/netlock/modules/net-lock/android/build/generated/res/pngs/release
+expo.modules.netlock.net-lock-updated_navigation_xml-1 /home/lukemn/Projects/netlock/modules/net-lock/android/build/generated/updated_navigation_xml/release
+expo.modules.netlock.net-lock-mergeReleaseResources-2 /home/lukemn/Projects/netlock/modules/net-lock/android/build/intermediates/incremental/release/mergeReleaseResources/merged.dir
+expo.modules.netlock.net-lock-mergeReleaseResources-3 /home/lukemn/Projects/netlock/modules/net-lock/android/build/intermediates/incremental/release/mergeReleaseResources/stripped.dir
+expo.modules.netlock.net-lock-release-4 /home/lukemn/Projects/netlock/modules/net-lock/android/build/intermediates/merged_res/release/mergeReleaseResources
+expo.modules.netlock.net-lock-release-5 /home/lukemn/Projects/netlock/modules/net-lock/android/build/intermediates/packaged_res/release/packageReleaseResources
+expo.modules.netlock.net-lock-main-6 /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/res
+expo.modules.netlock.net-lock-release-7 /home/lukemn/Projects/netlock/modules/net-lock/android/src/release/res
+gradleHome-0 /home/lukemn/.gradle

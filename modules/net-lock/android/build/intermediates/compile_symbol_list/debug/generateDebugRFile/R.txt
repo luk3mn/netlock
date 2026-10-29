@@ -1,1 +1,2 @@
+int xml accessibility_config 0x0
 int xml device_admin 0x0

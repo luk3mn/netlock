@@ -1,10 +1,14 @@
 import { requireNativeModule } from 'expo-modules-core';
 
 export type Status = {
-  isOwner: boolean;
+  secureSettings: boolean;
+  admin: boolean;
+  accessibility: boolean;
+  ready: boolean;
   active: boolean;
   host: string;
-  unlockAt: number;
+  requested: boolean;
+  waitMs: number;
   canDisable: boolean;
 };
 
@@ -12,10 +16,11 @@ type NetLockModule = {
   status(): Status;
   configure(host: string): void;
   enable(): void;
-  requestDisable(): number;
+  requestDisable(): void;
   cancelDisable(): void;
   disable(): void;
-  removeOwner(): void;
+  requestAdmin(): void;
+  openAccessibilitySettings(): void;
 };
 
 export default requireNativeModule<NetLockModule>('NetLock');
