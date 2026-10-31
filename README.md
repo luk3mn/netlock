@@ -8,14 +8,17 @@ O projeto é de uso pessoal e instalado por APK, fora da Play Store.
 
 | Peça | Função |
 |---|---|
-| `WRITE_SECURE_SETTINGS` | Permite ao app escrever o Private DNS do sistema. Concedida uma vez via `adb` |
+| `WRITE_SECURE_SETTINGS` | Permite ao app escrever o Private DNS e a lista de serviços de acessibilidade do sistema. Concedida uma vez via `adb` |
 | Serviço de acessibilidade | Refaz o DNS na hora se alguém alterar e fecha as telas de Configurações que permitiriam desinstalar, forçar parada ou desligar o próprio serviço |
+| Serviço de guarda | Serviço em primeiro plano que observa as configurações do sistema. Se o serviço de acessibilidade for desligado, ele o religa em cerca de um segundo |
 | Device Admin | Bloqueia a desinstalação normal enquanto estiver ativo |
 | Delay de desativação | Para desligar, é preciso pedir e esperar `DELAY_MS`. Depois abre uma janela de `WINDOW_MS` para confirmar |
 
+Com a proteção ativa, desligar a acessibilidade pelas Configurações não funciona: o toggle volta a ligar sozinho. O caminho que exige esforço é plugar o celular no computador e revogar a permissão `WRITE_SECURE_SETTINGS` por `adb` (veja [Saídas de emergência](#saídas-de-emergência)), ou passar pelo delay do app.
+
 O contador usa `elapsedRealtime`, então mudar a data do aparelho não adianta o tempo. Reiniciar o aparelho **cancela** o pedido em andamento.
 
-O app **não** é Device Owner. Por isso existe sempre uma saída sem formatar o aparelho (veja [Saídas de emergência](#saídas-de-emergência)).
+O app **não** é Device Owner. Por isso existe sempre uma saída sem formatar o aparelho.
 
 ## Requisitos
 
@@ -100,14 +103,25 @@ Na mesma tela de informações do app, mantenha **desligado** o toggle "Gerencia
 2. Volte à tela principal. Os três itens da checklist devem estar com ✓.
 3. Toque em **Ativar proteção**.
 
-Para validar, abra [test.nextdns.io](https://test.nextdns.io). Ele deve mostrar o seu perfil e o protocolo DoT.
+Ao ativar, o serviço de guarda sobe em primeiro plano. Ele mostra uma notificação de baixa prioridade, mas continua rodando mesmo que as notificações do app estejam bloqueadas.
+
+Para validar o DNS, abra [test.nextdns.io](https://test.nextdns.io). Ele deve mostrar o seu perfil e o protocolo DoT.
+
+Para validar o guarda, desligue o netlock em Configurações > Acessibilidade. O toggle deve voltar a ligar sozinho em cerca de um segundo. Pelo terminal:
+
+```bash
+adb shell settings get secure enabled_accessibility_services
+```
+
+A saída deve continuar listando `com.luk3mn.netlock/expo.modules.netlock.NetLockAccessibilityService`.
 
 ## Uso diário
 
 Com a proteção ativa:
 
 - Alterar o DNS privado nas Configurações é revertido automaticamente.
-- Abrir a Info do app, tentar desinstalar ou forçar a parada fecha a tela e volta à home.
+- Desligar o serviço de acessibilidade é revertido automaticamente.
+- Abrir a Info do app, tentar desinstalar, forçar a parada ou entrar na página de acessibilidade do app fecha a tela e volta à home.
 - O host só pode ser alterado com a proteção desligada.
 
 Para desativar:
@@ -117,6 +131,8 @@ Para desativar:
 3. Quando aparecer "Liberado", toque em **Desativar agora** dentro da janela.
 
 **Cancelar pedido** interrompe a espera a qualquer momento.
+
+Ao desativar, o serviço de guarda para e você pode desligar a acessibilidade e o admin normalmente.
 
 ## Ajustar o tempo de espera
 
@@ -140,7 +156,7 @@ Instale a nova versão **com a proteção desligada**:
 npx expo run:android --variant release --device
 ```
 
-A reinstalação por cima mantém o `WRITE_SECURE_SETTINGS`. Instale sempre pelo build local, para manter a mesma assinatura. Um APK assinado por outra chave não substitui a versão instalada, e com a proteção ativa você não consegue desinstalar a antiga.
+A reinstalação por cima mantém o `WRITE_SECURE_SETTINGS`, mas pode desligar o serviço de acessibilidade. Se a checklist mostrar o item sem ✓, religue o serviço (etapa 3). Instale sempre pelo build local, para manter a mesma assinatura. Um APK assinado por outra chave não substitui a versão instalada, e com a proteção ativa você não consegue desinstalar a antiga.
 
 ## Saídas de emergência
 
@@ -156,6 +172,14 @@ Para apenas devolver o DNS ao modo automático:
 adb shell settings put global private_dns_mode opportunistic
 ```
 
+Para liberar o toggle de acessibilidade sem desinstalar, revogue a permissão que permite ao guarda religá-lo:
+
+```bash
+adb shell pm revoke com.luk3mn.netlock android.permission.WRITE_SECURE_SETTINGS
+```
+
+Depois disso é possível desligar a acessibilidade, desativar o admin e desinstalar pelas Configurações. Para voltar a usar o app, conceda a permissão de novo (etapa 1).
+
 Pelo próprio celular, reinicie em **modo seguro** (segure o botão de desligar, toque e segure "Desligar" e confirme). Lá o serviço de acessibilidade não roda. Desative o admin em Configurações > Segurança e privacidade > Mais configurações de segurança > Apps administradores do dispositivo e desinstale o app.
 
 Essas saídas existem de propósito, para que um bug não prenda o aparelho. O delay protege contra o impulso, não contra quem procura um atalho.
@@ -168,10 +192,12 @@ Essas saídas existem de propósito, para que um bug não prenda o aparelho. O d
 | `SecurityException` no `pm grant` | Auto Blocker da One UI ativo. Desative o bloqueio de comandos por USB |
 | Botão **Conceder** não responde | A tela de Device Admin não abre com `FLAG_ACTIVITY_NEW_TASK`. A função `requestAdmin` deve usar `appContext.currentActivity`. Ative manualmente pelo caminho da etapa 2 |
 | Toggle da acessibilidade bloqueado | Use "Permitir configurações restritas" na Info do app |
-| DNS não volta sozinho ao ser alterado | O serviço de acessibilidade foi encerrado. Revise a bateria (etapa 4) e religue o serviço |
+| Toggle de acessibilidade não volta sozinho ao ser desligado | Confira se a proteção está ativa e se o guarda está de pé com `adb shell dumpsys activity services com.luk3mn.netlock`. Revise a bateria (etapa 4) e confirme que o `WRITE_SECURE_SETTINGS` continua concedido |
+| DNS não volta sozinho ao ser alterado | O guarda ou o serviço de acessibilidade foi encerrado. Revise a bateria e reative a proteção |
 | Uma tela sensível não fecha | Os textos variam por idioma e versão da One UI. Ajuste a lista `sensitive` em `NetLockAccessibilityService.kt` |
 | Sem internet após ativar | O Private DNS em modo `hostname` não tem fallback. Verifique o host, o perfil e o limite de consultas do plano no NextDNS |
 | `Native module not found` ou `undefined is not a function` | O app instalado foi compilado antes de o código nativo mudar. Recompile e reinstale |
+| Erro `Conflicting overloads` ou `Unresolved reference 'Intent'` no build | Método duplicado ou import faltando após editar o Kotlin. Mantenha cada função uma única vez e importe `android.content.Intent` |
 
 ## Limitações
 
@@ -179,6 +205,7 @@ Essas saídas existem de propósito, para que um bug não prenda o aparelho. O d
 - O filtro é por DNS. Navegadores ou apps com DNS próprio (DoH customizado) ignoram o Private DNS do sistema.
 - O Private DNS depende de o host do NextDNS responder. Se ele parar, o aparelho fica sem resolver domínios até você desativar a proteção.
 - Reiniciar o aparelho cancela o pedido de desativação em andamento.
+- **Apps bancários e antifraude**: muitos avisam ou restringem o uso quando há um serviço de acessibilidade de terceiros ativo, porque trojans bancários usam esse recurso. Como o netlock mantém o serviço ligado enquanto a proteção está ativa, isso pode acontecer. O serviço não pode ser ocultado desses apps. Alternativas: usar o banco pelo navegador ou testar o app dentro da Pasta Segura da Samsung.
 
 ## Estrutura
 
@@ -195,6 +222,8 @@ modules/net-lock/
       NetLockPolicy.kt
       NetLockAdminReceiver.kt
       NetLockAccessibilityService.kt
+      GuardService.kt
+      BootReceiver.kt
 src/
   app/        telas: index.tsx e config.tsx
   components/ button.tsx

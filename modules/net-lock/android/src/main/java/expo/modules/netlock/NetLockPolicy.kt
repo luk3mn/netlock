@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.SystemClock
 import android.provider.Settings
+import android.content.Intent
 
 object NetLockPolicy {
     private const val PREFS = "netlock"
@@ -17,8 +18,8 @@ object NetLockPolicy {
     private const val DNS_MODE = "private_dns_mode"
     private const val DNS_SPECIFIER = "private_dns_specifier"
 
-    const val DELAY_MS = 2L * 60 * 1000
-    const val WINDOW_MS = 30L * 60 * 1000
+    const val DELAY_MS = 30L * 60 * 1000
+    const val WINDOW_MS = 5L * 60 * 1000
 
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -112,6 +113,21 @@ object NetLockPolicy {
         prefs(context).edit().putString(KEY_HOST, host.trim()).apply()
     }
 
+    fun ensureDns(context: Context) {
+        val host = host(context)
+        if (host.isNotEmpty() && !isDnsApplied(context, host)) applyDns(context, host)
+    }
+
+    fun ensureAccessibility(context: Context) {
+        if (!canWriteSecureSettings(context) || isAccessibilityEnabled(context)) return
+        val resolver = context.contentResolver
+        val service = ComponentName(context, NetLockAccessibilityService::class.java).flattenToString()
+        val current = Settings.Secure.getString(resolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES).orEmpty()
+        val updated = if (current.isEmpty()) service else "$current:$service"
+        Settings.Secure.putString(resolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, updated)
+        Settings.Secure.putInt(resolver, Settings.Secure.ACCESSIBILITY_ENABLED, 1)
+    }
+
     fun enable(context: Context) {
         check(canWriteSecureSettings(context)) { "Falta a permissão WRITE_SECURE_SETTINGS. Rode o comando adb." }
         check(isAdmin(context)) { "Ative o administrador do dispositivo" }
@@ -122,6 +138,7 @@ object NetLockPolicy {
         applyDns(context, host)
         clearRequest(context)
         prefs(context).edit().putBoolean(KEY_ACTIVE, true).apply()
+        context.startForegroundService(Intent(context, GuardService::class.java))
     }
 
     fun requestDisable(context: Context) {
@@ -139,6 +156,7 @@ object NetLockPolicy {
         check(canDisable(context)) { "Aguardando o período de liberação" }
         prefs(context).edit().putBoolean(KEY_ACTIVE, false).apply()
         clearRequest(context)
+        context.stopService(Intent(context, GuardService::class.java))
         clearDns(context)
     }
 }

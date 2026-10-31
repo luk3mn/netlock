@@ -1,6 +1,7 @@
 package expo.modules.netlock
 
 import android.accessibilityservice.AccessibilityService
+import android.content.Intent
 import android.database.ContentObserver
 import android.os.Handler
 import android.os.Looper
@@ -23,6 +24,7 @@ class NetLockAccessibilityService : AccessibilityService() {
             "forçar parada", "force stop",
             "limpar dados", "clear data",
             "administrador", "administrator",
+            "acessibilidade", "accessibility",
             "desativar", "deactivate",
             "parar", "stop",
             "usar $label", "use $label"
@@ -35,6 +37,9 @@ class NetLockAccessibilityService : AccessibilityService() {
             contentResolver.registerContentObserver(Settings.Global.getUriFor(it), false, observer)
         }
         enforceDns()
+        if (NetLockPolicy.isActive(this)) {
+            runCatching { startForegroundService(Intent(this, GuardService::class.java)) }
+        }
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
@@ -47,10 +52,7 @@ class NetLockAccessibilityService : AccessibilityService() {
 
     private fun enforceDns() {
         if (!NetLockPolicy.isActive(this)) return
-        val host = NetLockPolicy.host(this)
-        if (host.isNotEmpty() && !NetLockPolicy.isDnsApplied(this, host)) {
-            NetLockPolicy.applyDns(this, host)
-        }
+        NetLockPolicy.ensureDns(this)
     }
 
     private fun AccessibilityNodeInfo.collectText(): Sequence<String> = sequence {

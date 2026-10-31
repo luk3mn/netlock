@@ -20,8 +20,8 @@ export default function Config() {
   };
 
   return (
-    <View className="flex-1 gap-4 p-6">
-      <Text className="text-white">Host do Private DNS (NextDNS)</Text>
+    <View style={{ flex: 1, padding: 16, backgroundColor: '#1f2937' }}>
+      <Text style={{ color: '#fff', fontWeight: 'bold' }}>Host do Private DNS (NextDNS)</Text>
       <TextInput
         value={host}
         onChangeText={setHost}
@@ -30,10 +30,16 @@ export default function Config() {
         autoCorrect={false}
         placeholder="abc123.dns.nextdns.io"
         placeholderTextColor="#71717a"
-        className="rounded-2xl bg-zinc-900 p-4 text-white"
+        style={{
+          color: '#fff',
+          borderColor: '#71717a',
+          borderWidth: 1,
+          borderRadius: 4,
+          padding: 8,
+        }}
       />
       {status.active && (
-        <Text className="text-amber-400">Bloqueado enquanto a proteção estiver ativa.</Text>
+        <Text style={{ color: '#f59e0b', fontWeight: 'bold' }}>Bloqueado enquanto a proteção estiver ativa.</Text>
       )}
       <Button label="Salvar" disabled={status.active || !host.trim()} onPress={save} />
     </View>

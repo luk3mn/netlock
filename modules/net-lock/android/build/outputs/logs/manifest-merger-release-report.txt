@@ -1,7 +1,7 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:1:1-33:12
-INJECTED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:1:1-33:12
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:1:1-49:12
+INJECTED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:1:1-49:12
 	package
 		INJECTED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml
 	xmlns:tools
@@ -9,53 +9,91 @@ INJECTED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/An
 	xmlns:android
 		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:2:3-61
 uses-permission#android.permission.WRITE_SECURE_SETTINGS
-ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:4:3-6:43
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:4:3-114
 	tools:ignore
-		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:6:5-40
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:4:76-111
 	android:name
-		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:5:5-60
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:4:20-75
+uses-permission#android.permission.FOREGROUND_SERVICE
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:5:3-75
+	android:name
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:5:20-72
+uses-permission#android.permission.FOREGROUND_SERVICE_SPECIAL_USE
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:6:3-87
+	android:name
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:6:20-84
+uses-permission#android.permission.RECEIVE_BOOT_COMPLETED
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:7:3-79
+	android:name
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:7:20-76
 application
-ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:8:3-32:17
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:9:3-48:17
 receiver#expo.modules.netlock.NetLockAdminReceiver
-ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:9:5-19:16
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:10:5-20:16
 	android:exported
-		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:11:7-30
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:12:7-30
 	android:permission
-		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:12:7-64
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:13:7-64
 	android:name
-		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:10:7-63
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:11:7-63
 intent-filter#action:name:android.app.action.DEVICE_ADMIN_ENABLED
-ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:13:7-15:23
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:14:7-16:23
 action#android.app.action.DEVICE_ADMIN_ENABLED
-ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:14:9-74
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:15:9-74
 	android:name
-		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:14:17-71
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:15:17-71
 meta-data#android.app.device_admin
-ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:16:7-18:48
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:17:7-19:48
 	android:resource
-		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:18:9-45
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:19:9-45
 	android:name
-		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:17:9-48
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:18:9-48
 service#expo.modules.netlock.NetLockAccessibilityService
-ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:21:5-31:15
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:22:5-32:15
 	android:exported
-		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:23:7-30
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:24:7-30
 	android:permission
-		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:24:7-73
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:25:7-73
 	android:name
-		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:22:7-70
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:23:7-70
 intent-filter#action:name:android.accessibilityservice.AccessibilityService
-ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:25:7-27:23
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:26:7-28:23
 action#android.accessibilityservice.AccessibilityService
-ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:26:9-84
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:27:9-84
 	android:name
-		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:26:17-81
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:27:17-81
 meta-data#android.accessibilityservice
-ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:28:7-30:56
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:29:7-31:56
 	android:resource
-		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:30:9-53
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:31:9-53
 	android:name
-		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:29:9-52
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:30:9-52
+service#expo.modules.netlock.GuardService
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:34:5-41:15
+	android:exported
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:36:7-31
+	android:foregroundServiceType
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:37:7-49
+	android:name
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:35:7-55
+property#android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:38:7-40:42
+	android:value
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:40:9-39
+	android:name
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:39:9-68
+receiver#expo.modules.netlock.BootReceiver
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:43:5-47:16
+	android:exported
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:43:64-87
+	android:name
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:43:15-63
+intent-filter#action:name:android.intent.action.BOOT_COMPLETED
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:44:7-46:23
+action#android.intent.action.BOOT_COMPLETED
+ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:45:9-71
+	android:name
+		ADDED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml:45:17-68
 uses-sdk
 INJECTED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /home/lukemn/Projects/netlock/modules/net-lock/android/src/main/AndroidManifest.xml
