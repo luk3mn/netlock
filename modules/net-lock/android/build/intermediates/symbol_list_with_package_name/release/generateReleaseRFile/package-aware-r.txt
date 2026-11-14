@@ -1,3 +1,2 @@
 expo.modules.netlock
-xml accessibility_config
 xml device_admin

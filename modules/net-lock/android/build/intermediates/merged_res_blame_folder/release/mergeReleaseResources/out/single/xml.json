@@ -1,0 +1,6 @@
+[
+    {
+        "merged": "expo.modules.netlock.net-lock-release-2:/xml/device_admin.xml",
+        "source": "expo.modules.netlock.net-lock-main-3:/xml/device_admin.xml"
+    }
+]

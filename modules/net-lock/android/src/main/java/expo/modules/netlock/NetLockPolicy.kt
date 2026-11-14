@@ -1,13 +1,12 @@
 package expo.modules.netlock
 
-import android.Manifest
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
-import android.content.pm.PackageManager
+import android.os.Build
 import android.os.SystemClock
+import android.os.UserManager
 import android.provider.Settings
-import android.content.Intent
 
 object NetLockPolicy {
     private const val PREFS = "netlock"
@@ -15,37 +14,29 @@ object NetLockPolicy {
     private const val KEY_ACTIVE = "active"
     private const val KEY_START = "request_start"
     private const val KEY_BOOT = "request_boot"
-    private const val DNS_MODE = "private_dns_mode"
-    private const val DNS_SPECIFIER = "private_dns_specifier"
 
-    const val DELAY_MS = 30L * 60 * 1000
-    const val WINDOW_MS = 5L * 60 * 1000
+    const val DELAY_MS = 2L * 60 * 1000
+    const val WINDOW_MS = 30L * 60 * 1000
+
+    private val restrictions = listOf(
+        UserManager.DISALLOW_CONFIG_PRIVATE_DNS,
+        UserManager.DISALLOW_CONFIG_VPN,
+        UserManager.DISALLOW_CONFIG_DATE_TIME
+    )
 
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
+    private fun dpm(context: Context) =
+        context.getSystemService(DevicePolicyManager::class.java)
+
+    private fun admin(context: Context) =
+        ComponentName(context, NetLockAdminReceiver::class.java)
+
     private fun bootCount(context: Context) =
         Settings.Global.getInt(context.contentResolver, Settings.Global.BOOT_COUNT, -1)
 
-    fun canWriteSecureSettings(context: Context) =
-        context.checkSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS) ==
-            PackageManager.PERMISSION_GRANTED
-
-    fun isAdmin(context: Context) =
-        context.getSystemService(DevicePolicyManager::class.java)
-            .isAdminActive(ComponentName(context, NetLockAdminReceiver::class.java))
-
-    fun isAccessibilityEnabled(context: Context): Boolean {
-        val enabled = Settings.Secure.getString(
-            context.contentResolver,
-            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-        ) ?: return false
-        val service = ComponentName(context, NetLockAccessibilityService::class.java)
-        return enabled.split(':').any {
-            it.equals(service.flattenToString(), ignoreCase = true) ||
-                it.equals(service.flattenToShortString(), ignoreCase = true)
-        }
-    }
+    fun isOwner(context: Context) = dpm(context).isDeviceOwnerApp(context.packageName)
 
     fun host(context: Context): String = prefs(context).getString(KEY_HOST, "") ?: ""
 
@@ -75,70 +66,39 @@ object NetLockPolicy {
     fun canDisable(context: Context): Boolean =
         elapsedSinceRequest(context)?.let { it >= DELAY_MS } ?: false
 
-    fun isDnsApplied(context: Context, host: String): Boolean {
-        val resolver = context.contentResolver
-        return Settings.Global.getString(resolver, DNS_MODE) == "hostname" &&
-            Settings.Global.getString(resolver, DNS_SPECIFIER) == host
-    }
-
-    fun applyDns(context: Context, host: String) {
-        val resolver = context.contentResolver
-        Settings.Global.putString(resolver, DNS_SPECIFIER, host)
-        Settings.Global.putString(resolver, DNS_MODE, "hostname")
-    }
-
-    private fun clearDns(context: Context) {
-        Settings.Global.putString(context.contentResolver, DNS_MODE, "opportunistic")
-    }
-
-    fun status(context: Context): Map<String, Any> {
-        val secure = canWriteSecureSettings(context)
-        val admin = isAdmin(context)
-        val accessibility = isAccessibilityEnabled(context)
-        return mapOf(
-            "secureSettings" to secure,
-            "admin" to admin,
-            "accessibility" to accessibility,
-            "ready" to (secure && admin && accessibility),
-            "active" to isActive(context),
-            "host" to host(context),
-            "requested" to isRequested(context),
-            "waitMs" to waitMs(context),
-            "canDisable" to canDisable(context)
-        )
-    }
+    fun status(context: Context): Map<String, Any> = mapOf(
+        "isOwner" to isOwner(context),
+        "active" to isActive(context),
+        "host" to host(context),
+        "requested" to isRequested(context),
+        "waitMs" to waitMs(context),
+        "canDisable" to canDisable(context)
+    )
 
     fun configure(context: Context, host: String) {
         check(!isActive(context)) { "Configuração bloqueada enquanto a proteção está ativa" }
         prefs(context).edit().putString(KEY_HOST, host.trim()).apply()
     }
 
-    fun ensureDns(context: Context) {
-        val host = host(context)
-        if (host.isNotEmpty() && !isDnsApplied(context, host)) applyDns(context, host)
-    }
-
-    fun ensureAccessibility(context: Context) {
-        if (!canWriteSecureSettings(context) || isAccessibilityEnabled(context)) return
-        val resolver = context.contentResolver
-        val service = ComponentName(context, NetLockAccessibilityService::class.java).flattenToString()
-        val current = Settings.Secure.getString(resolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES).orEmpty()
-        val updated = if (current.isEmpty()) service else "$current:$service"
-        Settings.Secure.putString(resolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, updated)
-        Settings.Secure.putInt(resolver, Settings.Secure.ACCESSIBILITY_ENABLED, 1)
-    }
-
     fun enable(context: Context) {
-        check(canWriteSecureSettings(context)) { "Falta a permissão WRITE_SECURE_SETTINGS. Rode o comando adb." }
-        check(isAdmin(context)) { "Ative o administrador do dispositivo" }
-        check(isAccessibilityEnabled(context)) { "Ative o serviço de acessibilidade" }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) error("Requer Android 11 ou superior")
+        check(isOwner(context)) { "O app ainda não é Device Owner" }
         val host = host(context)
         require(host.isNotEmpty()) { "Defina o host do DNS nas configurações" }
 
-        applyDns(context, host)
+        val manager = dpm(context)
+        val admin = admin(context)
+
+        manager.setAutoTimeEnabled(admin, true)
+        val result = manager.setGlobalPrivateDnsModeSpecifiedHost(admin, host)
+        check(result == DevicePolicyManager.PRIVATE_DNS_SET_NO_ERROR) { "Falha ao aplicar o DNS (código $result)" }
+
+        restrictions.forEach { manager.addUserRestriction(admin, it) }
+        manager.setUninstallBlocked(admin, context.packageName, true)
+        manager.setUserControlDisabledPackages(admin, listOf(context.packageName))
+
         clearRequest(context)
         prefs(context).edit().putBoolean(KEY_ACTIVE, true).apply()
-        context.startForegroundService(Intent(context, GuardService::class.java))
     }
 
     fun requestDisable(context: Context) {
@@ -153,10 +113,18 @@ object NetLockPolicy {
     fun cancelDisable(context: Context) = clearRequest(context)
 
     fun disable(context: Context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) error("Requer Android 11 ou superior")
         check(canDisable(context)) { "Aguardando o período de liberação" }
-        prefs(context).edit().putBoolean(KEY_ACTIVE, false).apply()
+
+        val manager = dpm(context)
+        val admin = admin(context)
+
+        restrictions.forEach { manager.clearUserRestriction(admin, it) }
+        manager.setUninstallBlocked(admin, context.packageName, false)
+        manager.setUserControlDisabledPackages(admin, emptyList())
+        manager.setGlobalPrivateDnsModeOpportunistic(admin)
+
         clearRequest(context)
-        context.stopService(Intent(context, GuardService::class.java))
-        clearDns(context)
+        prefs(context).edit().putBoolean(KEY_ACTIVE, false).apply()
     }
 }

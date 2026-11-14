@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Alert, Text, View } from 'react-native';
 import NetLock from '../../modules/net-lock';
 import { Button } from '../components/button';
 import { useNetLock } from '../hooks/use-net-lock';
@@ -35,47 +35,16 @@ export default function Home() {
       ]
     );
 
-  const steps = [
-    { key: 'secure', label: 'Permissão via adb', done: status.secureSettings },
-    {
-      key: 'admin',
-      label: 'Administrador do dispositivo',
-      done: status.admin,
-      cta: 'Conceder',
-      onPress: () => run(() => NetLock.requestAdmin()),
-    },
-    {
-      key: 'accessibility',
-      label: 'Serviço de acessibilidade',
-      done: status.accessibility,
-      cta: 'Abrir',
-      onPress: () => run(() => NetLock.openAccessibilitySettings()),
-    },
-  ];
-
   return (
     <View style={{ flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#18181b' }}>
       <Text style={{ textAlign: 'center', fontSize: 24, fontWeight: 'bold', color: '#ffffff' }}>
         {status.active ? 'Proteção ativa' : 'Proteção desligada'}
       </Text>
 
-      {!status.active && !status.ready && (
-        <View style={{ gap: 12, borderRadius: 16, backgroundColor: '#3f3f46', padding: 16 }}>
-          {steps.map((step) => (
-            <View key={step.key} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-              <Text style={step.done ? { color: '#10b981' } : { color: '#f59e0b' }}>
-                {step.done ? '✓' : '•'} {step.label}
-              </Text>
-              {!step.done && step.onPress && (
-                <Pressable onPress={step.onPress}>
-                  <Text style={{ fontWeight: 'bold', color: '#ffffff', textDecorationLine: 'underline' }}>
-                    {step.cta}
-                  </Text>
-                </Pressable>
-              )}
-            </View>
-          ))}
-        </View>
+      {!status.active && !status.isOwner && (
+        <Text style={{ textAlign: 'center', color: '#f59e0b', marginTop: 10 }}>
+          O app ainda não é Device Owner. Rode o comando adb.
+        </Text>
       )}
 
       {waiting && (
@@ -85,7 +54,7 @@ export default function Home() {
       )}
 
       {status.canDisable && (
-        <Text style={{ textAlign: 'center', color: '#10b981' }}>
+        <Text style={{ textAlign: 'center', color: '#10b981', marginTop: 10 }}>
           Liberado. Você pode desativar agora.
         </Text>
       )}
@@ -93,7 +62,7 @@ export default function Home() {
       {!status.active && (
         <Button
           label="Ativar proteção"
-          disabled={!status.ready || !status.host}
+          disabled={!status.isOwner || !status.host}
           onPress={() => run(() => NetLock.enable())}
         />
       )}
